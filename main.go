@@ -95,10 +95,18 @@ func run() error {
 	led3 := machine.D9
 	led2 := machine.D8
 	led1 := machine.D7
+	bz := machine.D10
 
 	led3.Configure(machine.PinConfig{Mode: machine.PinOutput})
 	led2.Configure(machine.PinConfig{Mode: machine.PinOutput})
 	led1.Configure(machine.PinConfig{Mode: machine.PinOutput})
+	bz.Configure(machine.PinConfig{Mode: machine.PinOutput})
+
+	// 初期化
+	led1.High()
+	led2.High()
+	led3.High()
+	bz.Low()
 
 	// BLEを有効
 	err := adapter.Enable()
@@ -156,27 +164,35 @@ func run() error {
 		select {
 		case val := <-ch:
 			if (val[0] & 0x01) == 0x01 {
-				machine.D7.Low()
+				led1.Low()
+
 			} else {
-				machine.D7.High()
+				led1.High()
 			}
 
 			if (val[0] & 0x02) == 0x02 {
-				machine.D8.Low()
+				led2.Low()
+
 			} else {
-				machine.D8.High()
+				led2.High()
 			}
 
 			if (val[0] & 0x04) == 0x04 {
-				machine.D9.Low()
+				led3.Low()
+
 			} else {
-				machine.D9.High()
+				led3.High()
+			}
+
+			if (val[0] & 0x08) == 0x08 {
+				bz.High()
+			} else {
+				bz.Low()
 			}
 			break
 
 		case tData := <-ch1:
 			txChar.Write(tData)
-			//fmt.Println(int32((uint32(tData[3])<<24) + (uint32(tData[2])<<16) + (uint32(tData[1])<<8) + uint32(tData[0])))
 			break
 		}
 	}
